@@ -51,7 +51,7 @@ jobs:
         run: |
           sudo apt-get install -y libopenblas-dev
 
-      - uses: Jimver/cuda-toolkit@v0.2.10
+      - uses: Jimver/cuda-toolkit@v0.2.14
         id: cuda-toolkit
         if: contains(matrix.build, 'cublas')
         with:
@@ -190,7 +190,7 @@ jobs:
         run: |
           sudo apt-get install -y libopenblas0
 
-      - uses: Jimver/cuda-toolkit@v0.2.10
+      - uses: Jimver/cuda-toolkit@v0.2.14
         id: cuda-toolkit
         if: ${{ matrix.build == 'cublas' }}
         with:
