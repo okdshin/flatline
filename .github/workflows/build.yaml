@@ -24,8 +24,10 @@ jobs:
             defines: '-DLLAMA_BLAS=ON -DLLAMA_BLAS_VENDOR=OpenBLAS'
           - build: 'cublas11'
             defines: '-DLLAMA_CUBLAS=ON'
+            cuda_version: '11.8.0'
           - build: 'cublas12'
             defines: '-DLLAMA_CUBLAS=ON'
+            cuda_version: '12.2.0'
 
     steps:
       - name: Clone
@@ -49,15 +51,9 @@ jobs:
 
       - uses: Jimver/cuda-toolkit@v0.2.10
         id: cuda-toolkit
-        if: ${{ matrix.build == 'cublas11' }}
+        if: contains(matrix.build, 'cublas')
         with:
-          cuda: '11.8.0'
-
-      - uses: Jimver/cuda-toolkit@v0.2.10
-        id: cuda-toolkit
-        if: ${{ matrix.build == 'cublas12' }}
-        with:
-          cuda: '12.2.0'
+          cuda: ${{ matrix.cuda_version }}
 
       - name: Build backend server
         id: cmake_build_backend_server
