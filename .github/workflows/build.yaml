@@ -22,8 +22,12 @@ jobs:
         include:
           - build: 'openblas'
             defines: '-DLLAMA_BLAS=ON -DLLAMA_BLAS_VENDOR=OpenBLAS'
-          - build: 'cublas'
+          - build: 'cublas11'
             defines: '-DLLAMA_CUBLAS=ON'
+            cuda_version: '11.8.0'
+          - build: 'cublas12'
+            defines: '-DLLAMA_CUBLAS=ON'
+            cuda_version: '12.2.0'
 
     steps:
       - name: Clone
@@ -36,6 +40,8 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y build-essential libpython3-dev
           python3 -m pip install cmake
+          # https://discuss.pytorch.org/t/installing-pytorch-under-python-3-8-question-about-networkx-version/196740
+          python3 -m pip install networkx==2.8.8
           python3 -m pip install torch --index-url https://download.pytorch.org/whl/cpu
           python3 -m pip install transformers==4.33.3 tiktoken pygls pyinstaller
 
@@ -45,11 +51,11 @@ jobs:
         run: |
           sudo apt-get install -y libopenblas-dev
 
-      - uses: Jimver/cuda-toolkit@v0.2.10
+      - uses: Jimver/cuda-toolkit@v0.2.14
         id: cuda-toolkit
-        if: ${{ matrix.build == 'cublas' }}
+        if: contains(matrix.build, 'cublas')
         with:
-          cuda: '11.8.0'
+          cuda: ${{ matrix.cuda_version }}
 
       - name: Build backend server
         id: cmake_build_backend_server
@@ -132,15 +138,26 @@ jobs:
           asset_name: flatline_lsp_ubuntu2004_openblas.zip
           asset_content_type: application/zip
 
-      - name: Upload release cublas asset
-        id: upload_release_cublas_asset
+      - name: Upload release cublas11 asset
+        id: upload_release_cublas11_asset
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: flatline_lsp_ubuntu2004_cublas.zip/flatline_lsp_ubuntu2004_cublas.zip
-          asset_name: flatline_lsp_ubuntu2004_cublas.zip
+          asset_path: flatline_lsp_ubuntu2004_cublas11.zip/flatline_lsp_ubuntu2004_cublas11.zip
+          asset_name: flatline_lsp_ubuntu2004_cublas11.zip
+          asset_content_type: application/zip
+
+      - name: Upload release cublas12 asset
+        id: upload_release_cublas12_asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: flatline_lsp_ubuntu2004_cublas12.zip/flatline_lsp_ubuntu2004_cublas12.zip
+          asset_name: flatline_lsp_ubuntu2004_cublas12.zip
           asset_content_type: application/zip
 
   test-on-ubuntu-2004:
@@ -173,7 +190,7 @@ jobs:
         run: |
           sudo apt-get install -y libopenblas0
 
-      - uses: Jimver/cuda-toolkit@v0.2.10
+      - uses: Jimver/cuda-toolkit@v0.2.14
         id: cuda-toolkit
         if: ${{ matrix.build == 'cublas' }}
         with:
