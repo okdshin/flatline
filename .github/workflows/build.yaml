@@ -22,7 +22,9 @@ jobs:
         include:
           - build: 'openblas'
             defines: '-DLLAMA_BLAS=ON -DLLAMA_BLAS_VENDOR=OpenBLAS'
-          - build: 'cublas'
+          - build: 'cublas11'
+            defines: '-DLLAMA_CUBLAS=ON'
+          - build: 'cublas12'
             defines: '-DLLAMA_CUBLAS=ON'
 
     steps:
@@ -47,9 +49,15 @@ jobs:
 
       - uses: Jimver/cuda-toolkit@v0.2.10
         id: cuda-toolkit
-        if: ${{ matrix.build == 'cublas' }}
+        if: ${{ matrix.build == 'cublas11' }}
         with:
           cuda: '11.8.0'
+
+      - uses: Jimver/cuda-toolkit@v0.2.10
+        id: cuda-toolkit
+        if: ${{ matrix.build == 'cublas12' }}
+        with:
+          cuda: '12.2.0'
 
       - name: Build backend server
         id: cmake_build_backend_server
@@ -132,15 +140,26 @@ jobs:
           asset_name: flatline_lsp_ubuntu2004_openblas.zip
           asset_content_type: application/zip
 
-      - name: Upload release cublas asset
-        id: upload_release_cublas_asset
+      - name: Upload release cublas11 asset
+        id: upload_release_cublas11_asset
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: flatline_lsp_ubuntu2004_cublas.zip/flatline_lsp_ubuntu2004_cublas.zip
-          asset_name: flatline_lsp_ubuntu2004_cublas.zip
+          asset_path: flatline_lsp_ubuntu2004_cublas11.zip/flatline_lsp_ubuntu2004_cublas11.zip
+          asset_name: flatline_lsp_ubuntu2004_cublas11.zip
+          asset_content_type: application/zip
+
+      - name: Upload release cublas12 asset
+        id: upload_release_cublas12_asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: flatline_lsp_ubuntu2004_cublas12.zip/flatline_lsp_ubuntu2004_cublas12.zip
+          asset_name: flatline_lsp_ubuntu2004_cublas12.zip
           asset_content_type: application/zip
 
   test-on-ubuntu-2004:
